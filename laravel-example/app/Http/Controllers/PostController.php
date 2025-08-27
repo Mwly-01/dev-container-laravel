@@ -9,8 +9,8 @@ class PostController extends Controller
 {
     use ApiResponse;
 
-    public function __invoke(){
+    public function __invoke()
+    {
         return $this->ok("Desde invoke");
     }
-
 }

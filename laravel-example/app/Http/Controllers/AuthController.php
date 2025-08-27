@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     use ApiResponse;
-
+    
     function login(Request $request) {
-        return $this->ok("Hellou Camper!", ['example' => 'example data']);
+        return $this->ok("Hello Camper!",['example' => 'example data']);
     }
 }
