@@ -20,6 +20,13 @@ class PostFactory extends Factory
             'title' => fake()->sentence(10),
             'content' => fake()->paragraph(),
             'status' => true,
+            'published_at' => fake()->dateTime(),
+            'cover_image'=> 'https://placehold.co/600x400/000000/FFFFFF/png',
+            'tags' => [fake()->sentence(1), fake()->sentence(2)],
+            'meta' => [
+                'seo_title' => fake()->sentence(2),
+                'seo_desc' => fake()->sentence(6)
+            ]
         ];
     }
 }
