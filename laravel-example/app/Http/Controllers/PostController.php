@@ -102,6 +102,7 @@ class PostController extends Controller
 
         return $this->success(null, 'Post eliminado', 204);
     }
+    
 
     public function restore(int $id): JsonResponse
     {
