@@ -10,6 +10,8 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\RecordsNotFoundException;
+
 
 // //TODO: Eliminar
 // use Illuminate\Support\Facades\DB;
@@ -27,7 +29,7 @@ class PostController extends Controller
         // return response()->json(DB::table('posts')->get());
         // return $this->ok("Todo ok, como dijo el Pibe", Post::get());
 
-        $posts = Post::with('categories')->get();
+        $posts = Post::with('user','categories')->get();
         //use App\Http\Resources\PostResource;
         return $this->success(PostResource::collection($posts));
     }
@@ -40,6 +42,9 @@ class PostController extends Controller
 
         $data = $request->validated();
 
+        //no se recibe un id del usuario malas practicas :^
+        $data['user_id']= $request->user()->id;//siempre toma el token
+
         if($request->hasFile('cover_image')) {
             $data['cover_image'] = $request->file('cover_image')->store('posts','public');
         }
@@ -48,6 +53,8 @@ class PostController extends Controller
         if(!empty($data['category_ids'])) {
             $newPost->categories()->sync($data['category_ids']);
         }
+
+        $newPost->load(['user','categories']);
 
         return $this->success(new PostResource($newPost), "Post creado correctamente", 201);
     }
@@ -59,6 +66,7 @@ class PostController extends Controller
     {
         $result = Post::find($id);
         if ($result) {
+            $result->load(['user','categories']);
             return $this->success(new PostResource($result), "Todo ok, como dijo el Pibe");
         } else {
             return $this->error("Todo mal, como NO dijo el Pibe", 404, ["id" => ["No se encontro el recurso con el id: $id"]]);
@@ -86,28 +94,42 @@ class PostController extends Controller
         }
 
         $post->update($data);
+
+        //$post->refresh
         if(array_key_exists('category_ids', $data)) {
             $post->categories()->sync($data['category_ids'] ?? []);
         }
 
+        $post->load(['user','categories']);
+
         return $this->success(new PostResource ($post));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Post $post): JsonResource
-    {
-        $post->delete(); // Soft delete
-
-        return $this->success(null, 'Post eliminado', 204);
-    }
-    
-
-    public function restore(int $id): JsonResponse
-    {
-        $post = Post::onlyTrashed()->findOrFail($id);
-        $post->restore();
-        return $this->success($post, 'Post restaurado correctamente');
-    }
+/**
+ * Remove the specified resource from storage.
+ */
+public function destroy(Post $post): JsonResponse
+{
+    $post->delete(); // Soft delete
+    return $this->success(null, 'Post eliminado', 204);
 }
+
+public function restore(int $id): JsonResponse
+{
+    Log::debug('restore: ' . $id);
+    $post = Post::onlyTrashed()->find($id);
+    
+    if (!$post) {
+        // throw new ModelNotFoundException('Post no encontrado', 404);
+        Log::debug('restore: ' . $id);
+        throw new RecordsNotFoundException('Post no encontrado', 404);
+    }
+
+    Log::debug('restore: start');
+    $post->restore();
+    $post->load('user', 'categories');
+    Log::debug('restore: success');
+    
+    return $this->success($post, 'Post restaurado correctamente');
+}
+};

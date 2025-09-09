@@ -21,14 +21,21 @@ class Post extends Model
         'published_at',
         'cover_image',
         'tags',
-        'meta'
+        'meta',
+        'user_id'
     ];
 
     protected $casts = [
         'pubished_at' => 'datetime',
         'tags' => 'array',
-        'meta' => 'array'
+        'meta' => 'array',
+        'delete_at' => 'datetime',
     ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
 
     public function categories() {
         // Tabla pivot post_category
