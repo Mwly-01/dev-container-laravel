@@ -4,16 +4,20 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Policies\PostPolicy;
-use Laravel\Passport\Passport;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Passport\Passport;
+
 class AuthServiceProvider extends ServiceProvider
 {
-    
-     protected $policies =[
+    //Policia de las politicas
+    protected $policies = [
         PostPolicy::class,
-     ];
+    ];
 
+    /**
+     * Bootstrap services.
+     */
     public function boot(): void
     {
         $this->registerPolicies();
@@ -22,39 +26,34 @@ class AuthServiceProvider extends ServiceProvider
 
         Passport::tokensExpireIn(now()->addHours(2));
         Passport::refreshTokensExpireIn(now()->addDay(30));
-        Passport::personalAccessTokensExpireIn(now()->addMonth(6));
+        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
 
-        
-        //gates
-
-        Gate::define('view-health', function(User $user){
-            return $user->hasRole(['editor','viewer']);
+        //Gate 
+        Gate::define('view-health', function (User $user) {
+            return $user->hasRole(['editor', 'viewer']);
         });
 
-        Gate::define('view-health', function(User $user){
-            return $user->hasRole(['editor','admin'])|| $user->tokenCan('posts.admin');
+        Gate::define('view-health-admin', function (User $user) {
+            return $user->hasRole(['editor', 'admin']) || $user->tokenCan('posts.admin');
         });
 
-        // //No recomendo 
-        // Gate::before(function(User $user, string $ability){
-        //     return $user->hasRole(['admin']) ? true : null; //true-> concede los permisos 
+        // NO RECOMENNDADO: PERO UTIL PARA PRUEBAS
+        // Gate::before(function (User $user, string $ability) {
+        //     return $user->hasRole(['admin']) ? true : null; //true -> concede los permisos
         // });
 
 
-
-        //SCOPES
-        //recurso.action
+        //Scopes
+        //recurso.accion
         Passport::tokensCan([
             'posts.read' => 'Leer posts',
-            'posts.write' => 'Crear o editar post',
-            'posts.delete' => 'eliminar',
-            'posts.admin'=> 'Acceso VIP',
+            'posts.write' => 'Crear o Editar posts',
+            'posts.delete' => 'Puede eliminar posts',
+            'posts.admin' => 'Acceso VIP',
         ]);
 
         Passport::defaultScopes([
             'posts.read',
-            
         ]);
- 
     }
 }

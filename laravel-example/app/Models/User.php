@@ -47,17 +47,19 @@ class User extends Authenticatable
         ];
     }
 
-    public function posts(){
+    public function posts()
+    {
         return $this->hasMany(Post::class);
     }
 
-    protected function roles()
+    public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_user')->withTimestamps();
     }
-    protected function hasRole(string|array $roles): bool 
+
+    public function hasRole(string|array $roles): bool
     {
-        $name = is_array($roles) ? $roles : [$roles];
-        return $this->roles()->whereIn('name', $name)->exists();
+        $names = is_array($roles) ? $roles : [$roles];
+        return $this->roles()->whereIn('name', $names)->exists();
     }
 }

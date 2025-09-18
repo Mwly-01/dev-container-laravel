@@ -29,7 +29,7 @@ class UserRegisteredMail extends Mailable implements ShouldQueue
             markdown: 'mail.user.registered',
         );
     }
-
+    
     public function attachments(): array
     {
         return [];

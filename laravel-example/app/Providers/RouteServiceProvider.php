@@ -23,12 +23,16 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        RateLimiter::for('api', function(Request $request) {
-            if($userId = optional($request->user())->getAuthIdentifier()) {
-                return Limit::perMinute(100)->by('uid:'.$userId);
+        Log::debug('Boot de Route Limiter');
+
+        RateLimiter::for('api', function (Request $request) {
+            Log::debug('Limit by ip' . $request->ip());
+            if ($userId = optional($request->user())->getAuthIdentifier()) {
+                return Limit::perMinute(100)->by('uid:' . $userId);
             }
 
-            return Limit::perMinute(30)->by('ip:'.$request->ip());
+            Log::debug('Limit by ip' . $request->ip());
+            return Limit::perMinute(30)->by('ip:' . $request->ip());
         });
     }
 }

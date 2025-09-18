@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name')->unique(); // admin, viewer, editor
             $table->string('label')->nullable();
             $table->timestamps();
         });
+
         Schema::create('role_user', function (Blueprint $table) {
             $table->id();
             $table->foreignId('role_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->unique(['role_id','user_id']);
+            $table->unique(['role_id', 'user_id']);
             $table->timestamps();
         });
     }
